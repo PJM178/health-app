@@ -1,15 +1,31 @@
 import { Request, Response } from "express";
+import { UserService } from "../services/users.service";
+import { NotFoundError } from "../utils/errors";
 
-export const getAllUsers = async (req: Request, res: Response) => {
-  const users = await userService.getAllUsers();
+const userService = new UserService();
 
-  res.json(users);
-};
+export class UsersController {
+  static async getAllUsers(req: Request, res: Response) {
+    const users = await userService.getAllUsers();
 
-export const getUserById = async (req: Request, res: Response) => {
-  const user = await userService.getUserById(req.params.id);
+    res.json(users);
+  }
 
-  if (!user) return res.status(404).json({ message: "User not found" });
+  static async getUserById(req: Request, res: Response) {
+    const id = req.params.id;
 
-  res.json(user);
-};
+    try {
+      const user = await userService.getUserById(id || "");
+
+      res.json(user);
+    } catch (err: any) {
+      if (err instanceof NotFoundError) {
+        return res.status(err.statusCode).json({ message: err.message });
+      }
+
+      console.error(err);
+
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+}
