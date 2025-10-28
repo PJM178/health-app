@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Allow requests from frontend
 app.use(cors({
-  origin: "http://localhost:3000", // or "*" to allow all origins (not recommended for production)
+  origin: "http://localhost:8081", // or "*" to allow all origins (not recommended for production)
   credentials: false // only if you're using cookies or auth headers
 }));
 
