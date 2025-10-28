@@ -1,0 +1,80 @@
+# ==================================================
+# 🔹 General
+# ==================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.DS_Store
+Thumbs.db
+
+# Local environment variables
+.env
+.env.local
+.env.*.local
+
+# TypeScript build output
+dist/
+build/
+*.tsbuildinfo
+
+# ==================================================
+# 🔹 Server (Node.js / Express)
+# ==================================================
+server/node_modules/
+server/dist/
+server/build/
+server/.env
+server/logs/
+server/*.log
+
+# ==================================================
+# 🔹 Client (Expo / React Native)
+# ==================================================
+client/node_modules/
+client/.expo/
+client/.expo-shared/
+client/dist/
+client/build/
+client/web-build/
+client/android/
+client/ios/
+client/.gradle/
+client/.idea/
+client/.vscode/
+client/*.keystore
+client/*.jks
+client/expo-env.d.ts
+
+# Metro bundler cache
+client/.metro-cache/
+
+# React Native packager cache
+client/.packager/
+
+# Android / Gradle
+client/android/.gradle/
+client/android/app/build/
+client/android/local.properties
+
+# Xcode / iOS
+client/ios/Pods/
+client/ios/build/
+client/ios/DerivedData/
+client/ios/*.xcworkspace
+client/ios/*.xcuserdata/
+
+# ==================================================
+# 🔹 OS / Editor junk
+# ==================================================
+*.swp
+*.swo
+*.tmp
+*.bak
+*.log
+.idea/
+.vscode/
+.history/
