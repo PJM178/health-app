@@ -18,18 +18,13 @@ app.use(cors({
 // Routes
 app.use("/api/users", usersRoute);
 
-// Root endpoint
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript server is running 🚀");
-});
-
 async function initializeServer() {
   // Try to connect to the db
   await connectToDb();
 
   app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 }
 
 initializeServer();
