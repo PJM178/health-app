@@ -1,4 +1,5 @@
 import { User } from "../models/user.model";
+import pool from "../db";
 
 export class UserRepository {
   private user: User;
@@ -8,22 +9,17 @@ export class UserRepository {
   }
 
   async findAll(): Promise<User[]> {
-    const users = await new Promise<User[]>((res, rej) => {
-      return (
-        setTimeout(() => res([this.user, this.user]), 1000)
-      ); 
-    });
+    const users = await pool.query("SELECT * FROM users;");
 
-    return users;
+    return users.rows;
   }
 
-  async findById(id: string): Promise<User | null> {
-    const user = await new Promise<User>((res, rej) => {
-      return (
-        setTimeout(() => res(this.user), 1000)
-      ); 
-    });
+  async findById(id: string): Promise<User | undefined> {
+    const query = "SELECT * FROM users WHERE id = $1;";
+    const values = [id];
 
-    return user;
+    const user = await pool.query(query, values);
+
+    return user.rows[0];
   }
 }
