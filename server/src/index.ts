@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import usersRoute from "./routes/users.route";
 import cors from "cors";
+import { connectToDb } from "./db";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -22,6 +23,13 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript server is running 🚀");
 });
 
-app.listen(PORT, () => {
+async function initializeServer() {
+  // Try to connect to the db
+  await connectToDb();
+
+  app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+}
+
+initializeServer();

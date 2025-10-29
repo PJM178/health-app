@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: health-app-postgresql
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: devdb
+    ports:
+      - '5432:5432'
