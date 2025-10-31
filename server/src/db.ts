@@ -6,7 +6,7 @@ const { Pool } = pkg;
 
 const pool = new Pool({
   host: process.env.PGHOST,
-  port: Number(process.env.PGPORT) ?? 5432,
+  port: process.env.PGPORT ? Number(process.env.PGPORT) : 5000,
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
   database: process.env.PGDATABASE,
@@ -20,7 +20,6 @@ export async function connectToDb(retries = 20, delay = 1000) {
     try {
       const res = await pool.query('SELECT NOW()');
       console.log('✅ Connected to PostgreSQL at', res.rows[0].now);
-
       break;
     } catch (err) {
       console.warn(`Database not ready, retrying - attempt ${attempt}/${retries}`);
