@@ -16,4 +16,13 @@ export class UserRepository {
 
     return user.rows[0];
   }
+
+  async findByUsername(username: string): Promise<User | undefined> {
+    const query = "SELECT * FROM users WHERE username = $1;";
+    const values = [username];
+
+    const user = await pool.query(query, values);
+
+    return user.rows[0];
+  }
 }

@@ -1,6 +1,6 @@
 import { UserRepository } from "../repositories/users.repository";
 import { User } from "../models/user.model";
-import { NotFoundError } from "../utils/errors";
+import { HttpError, NotFoundError } from "../utils/errors";
 
 export class UserService {
   private userRepository: UserRepository;
@@ -23,5 +23,22 @@ export class UserService {
     }
 
     return user;
+  }
+
+  // TODO: authentication flow, just preliminary stuff for now
+  async login(username: string, password: string): Promise<{ user: User }> {
+    const user = await this.userRepository.findByUsername(username);
+    
+    if (!user) {
+      throw new HttpError(404, "User not found");
+    }
+
+    const validPassword = user.password === password;
+
+    if (!validPassword) {
+      throw new HttpError(401, "Invalid credentials");
+    }
+
+    return { user };
   }
 }

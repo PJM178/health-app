@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, FlatList, Text } from "react-native";
 
 const Users = () => {
-  const [data, setData] = useState<[{ id: string, name: string }] | []>([]);
+  const [data, setData] = useState<[{ id: string, username: string }] | []>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const Users = () => {
 
             return (
               <Text key={index} >
-                {item.id}{item.name}
+                {item.id}{item.username}
               </Text>
             );
           }}

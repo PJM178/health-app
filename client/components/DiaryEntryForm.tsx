@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, StyleSheet, Alert } from "react-native";
+import { Modal, View, Text, Pressable, StyleSheet, Alert, TouchableWithoutFeedback } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 
@@ -11,25 +11,28 @@ const DiaryEntryForm = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.centeredView}>
+
         <Modal
           animationType="slide"
-          transparent={false}
+          transparent={true}
           visible={modalVisible}
           onRequestClose={() => {
             Alert.alert('Modal has been closed.');
             setModalVisible(!modalVisible);
           }}
           onBlur={() => setModalVisible(false)}
-          >
+        >
           <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>Hello World!</Text>
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}>
-                <Text style={styles.textStyle}>Hide Modal</Text>
-              </Pressable>
-            </View>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>Hello World!</Text>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => setModalVisible(!modalVisible)}>
+                  <Text style={styles.textStyle}>Hide Modal</Text>
+                </Pressable>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
         </Modal>
         <Pressable
@@ -38,7 +41,8 @@ const DiaryEntryForm = () => {
           <Text style={styles.textStyle}>Show Modal</Text>
         </Pressable>
       </SafeAreaView>
-    </SafeAreaProvider>
+
+    </SafeAreaProvider >
   );
 };
 
