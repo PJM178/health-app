@@ -1,22 +1,38 @@
-import { Text, View } from "react-native";
-import Users from "@/components/Users";
-import DiaryEntryForm from "@/components/DiaryEntryForm";
+import { Text, View, StyleSheet } from 'react-native';
+ import { Link } from 'expo-router'; 
+import { useEffect } from 'react';
 
 export default function Index() {
-  return (
-    <>
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text>Edit app/index.tsx to edit this screen.</Text>
-        <Users />
+  useEffect(() => {
+    console.log(Math.random());
+  });
 
-      </View>
-      <DiaryEntryForm />
-    </>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Home screen</Text>
+      <Link href="/users/profile" style={styles.button}>
+        Go to About screen
+      </Link>
+      <Link href="./products" style={styles.button}>
+        Go to Products screen
+      </Link>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#25292e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    color: '#fff',
+  },
+  button: {
+    fontSize: 20,
+    textDecorationLine: 'underline',
+    color: '#fff',
+  },
+});
