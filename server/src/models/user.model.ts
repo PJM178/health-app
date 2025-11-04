@@ -21,4 +21,4 @@ export interface User {
 }
 
 type Gender = "male" | "female" | "other" | "unknown";
-type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+type ActivityLevel = "sedentary" | "light" | "moderate" | "active" | "very_active";

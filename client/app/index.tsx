@@ -1,6 +1,7 @@
 import { Text, View, StyleSheet } from 'react-native';
  import { Link } from 'expo-router'; 
 import { useEffect } from 'react';
+import SideMenu from '@/components/SideMenu';
 
 export default function Index() {
   useEffect(() => {

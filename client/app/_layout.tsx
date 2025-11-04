@@ -1,4 +1,5 @@
 import { Header } from '@/components/Header';
+import SideMenu from '@/components/SideMenu';
 import { Stack } from 'expo-router';
 
 export default function RootLayout() {
@@ -11,6 +12,7 @@ export default function RootLayout() {
         <Stack.Screen name="/products" options={{ title: "About", headerShown: false }} />
         {/* <Stack.Screen name="users/profile" options={{ title: "Profile", headerShown: true, animation: "slide_from_bottom", animationDuration: 100 }} /> */}
       </Stack>
+      <SideMenu side="left" isOpen={true} />
     </>
   );
 }

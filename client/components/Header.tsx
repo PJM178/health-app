@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useState } from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -16,27 +16,23 @@ export function Header(props: HeaderProps) {
   };
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView  style={{ height: 16 }}>
-        <View style={styleSheet.container}>
-          <View style={styleSheet.menu}>
-            <Pressable onPress={handleOpenMenu}>
-              <MaterialIcons name="menu" size={36} color="black" />
-            </Pressable>
-          </View>
-          <View style={styleSheet.logo}>
-            <Text>
-              HAPPI
-            </Text>
-          </View>
-          <View style={styleSheet.extra}>
-            {/* <Text>
+    <SafeAreaView style={styleSheet.container}>
+      <View style={styleSheet.menuContainer}>
+        <Pressable onPress={handleOpenMenu}>
+          <MaterialIcons name="menu" size={36} color="white" />
+        </Pressable>
+      </View>
+      <View style={styleSheet.logoContainer}>
+        <Text style={styleSheet.logoText}>
+          HAPPI
+        </Text>
+      </View>
+      <View style={styleSheet.extraContainer}>
+        {/* <Text>
           Logo
         </Text> */}
-          </View>
-        </View>
-      </SafeAreaView>
-    </SafeAreaProvider>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -44,21 +40,26 @@ const styleSheet = StyleSheet.create({
   container: {
     padding: 16,
     flexDirection: "row",
+    backgroundColor: "#25292e",
   },
-  menu: {
+  menuContainer: {
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "flex-start",
     height: 36,
   },
-  logo: {
+  logoContainer: {
     flex: 5,
     justifyContent: "center",
     alignItems: "center",
   },
-  extra: {
+  extraContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  logoText: {
+    color: "#fff",
+    fontWeight: "bold",
   }
 });
