@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dimensions, View, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
@@ -11,18 +11,19 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const MENU_WIDTH = SCREEN_WIDTH * 0.75;
 // This controls how close to the left edge your gesture needs to be for it to trigger opening the menu
-const GESTURE_FAIL_DISTANCE = SCREEN_WIDTH * 0.05;
+const GESTURE_FAIL_DISTANCE = SCREEN_WIDTH * 0.10;
 
 interface SideMenuProps {
   side: "left" | "right";
   isOpen: boolean;
-
 }
 
+// TODO: perhaps control the rgba value of the backdrop 
 export default function SideMenu(props: SideMenuProps) {
   const onLeft = useSharedValue(false);
   const translateX = useSharedValue(-MENU_WIDTH);
   const fullyOpen = useSharedValue(false);
+  const [innerOpen, setInnerOpen] = useState(props.isOpen);
 
   const panGesture = Gesture.Pan()
 
@@ -57,12 +58,14 @@ export default function SideMenu(props: SideMenuProps) {
       if (shouldOpen && onLeft.value) {
         translateX.value = withTiming(0, { duration: 200 });
         fullyOpen.value = true;
+        setInnerOpen(true);
         // scheduleOnRN(open)();
       } else {
         console.log("closes");
         translateX.value = withTiming(-MENU_WIDTH, { duration: 200 });
         onLeft.value = false;
         fullyOpen.value = false;
+        setInnerOpen(false);
         // scheduleOnRN(close)();
       }
     });
@@ -71,12 +74,23 @@ export default function SideMenu(props: SideMenuProps) {
     transform: [{ translateX: translateX.value }],
   }));
 
+  const handleBackdropClick = () => {
+    setInnerOpen(false);
+    onLeft.value = false;
+    fullyOpen.value = false;
+    translateX.value = withTiming(-MENU_WIDTH, { duration: 200 });
+  }
+
   return (
     <GestureDetector gesture={panGesture}>
-      <View style={StyleSheet.absoluteFill}>
-        {props.isOpen &&
+      <View
+        style={StyleSheet.absoluteFill}
+        pointerEvents={"auto"}
+      >
+        {innerOpen &&
           <Animated.View
-            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)' }]}
+            onTouchStart={handleBackdropClick}
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.4)" }]}
           />}
         <Animated.View style={[styles.box, animatedStyle]} />
       </View>
