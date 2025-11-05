@@ -4,14 +4,14 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const MENU_WIDTH = SCREEN_WIDTH * 0.75;
 // This controls how close to the left edge your gesture needs to be for it to trigger opening the menu
-const GESTURE_FAIL_DISTANCE = SCREEN_WIDTH * 0.10;
+const GESTURE_FAIL_DISTANCE = SCREEN_WIDTH * 0.05;
 
 interface SideMenuProps {
   side: "left" | "right";
@@ -26,48 +26,51 @@ export default function SideMenu(props: SideMenuProps) {
   const [innerOpen, setInnerOpen] = useState(props.isOpen);
 
   const panGesture = Gesture.Pan()
-
+    .hitSlop({ left: 0, width: GESTURE_FAIL_DISTANCE })
     .onTouchesDown((e) => {
-      const startX = e.allTouches[0].x;
-      if (startX > GESTURE_FAIL_DISTANCE) {
-        return;
-      }
+      console.log("touch start", e);
+      // const startX = e.allTouches[0].x;
+      // if (startX > GESTURE_FAIL_DISTANCE) {
+      //   return;
+      // }
     })
     .onUpdate((e) => {
-      const { translationX, velocityX } = e;
-      const startX = e.absoluteX;
-      console.log(startX)
-      if (startX > GESTURE_FAIL_DISTANCE && !onLeft.value) {
-        return;
-      } else {
-        onLeft.value = true;
-      }
+      console.log("update", e);
+      // const { translationX, velocityX } = e;
+      // const startX = e.absoluteX;
+      // console.log(startX)
+      // if (startX > GESTURE_FAIL_DISTANCE && !onLeft.value) {
+      //   return;
+      // } else {
+      //   onLeft.value = true;
+      // }
 
-      if (!fullyOpen.value) {
-        translateX.value = Math.min(0, Math.max(-MENU_WIDTH, translationX - MENU_WIDTH));
-      } else {
-        translateX.value = Math.max(-MENU_WIDTH, Math.min(0, translationX));
-      }
+      // if (!fullyOpen.value) {
+      //   translateX.value = Math.min(0, Math.max(-MENU_WIDTH, translationX - MENU_WIDTH));
+      // } else {
+      //   translateX.value = Math.max(-MENU_WIDTH, Math.min(0, translationX));
+      // }
     })
     .onEnd((e) => {
-      const { translationX, velocityX } = e;
       console.log("end", e);
-      const shouldOpen = translationX > MENU_WIDTH * (1 / 3) || velocityX > 500;
-      console.log("onleft", onLeft.value);
-      console.log("shouldopen", shouldOpen);
-      if (shouldOpen && onLeft.value) {
-        translateX.value = withTiming(0, { duration: 200 });
-        fullyOpen.value = true;
-        setInnerOpen(true);
-        // scheduleOnRN(open)();
-      } else {
-        console.log("closes");
-        translateX.value = withTiming(-MENU_WIDTH, { duration: 200 });
-        onLeft.value = false;
-        fullyOpen.value = false;
-        setInnerOpen(false);
-        // scheduleOnRN(close)();
-      }
+      // const { translationX, velocityX } = e;
+      // console.log("end", e);
+      // const shouldOpen = translationX > MENU_WIDTH * (1 / 3) || velocityX > 500;
+      // console.log("onleft", onLeft.value);
+      // console.log("shouldopen", shouldOpen);
+      // if (shouldOpen && onLeft.value) {
+      //   translateX.value = withTiming(0, { duration: 200 });
+      //   fullyOpen.value = true;
+      //   setInnerOpen(true);
+      //   // scheduleOnRN(open)();
+      // } else {
+      //   console.log("closes");
+      //   translateX.value = withTiming(-MENU_WIDTH, { duration: 200 });
+      //   onLeft.value = false;
+      //   fullyOpen.value = false;
+      //   setInnerOpen(false);
+      //   // scheduleOnRN(close)();
+      // }
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -82,7 +85,10 @@ export default function SideMenu(props: SideMenuProps) {
   }
 
   return (
-    <GestureDetector gesture={panGesture}>
+    <GestureDetector 
+    gesture={panGesture}
+    
+    >
       <View
         style={StyleSheet.absoluteFill}
         pointerEvents={"auto"}
@@ -100,14 +106,14 @@ export default function SideMenu(props: SideMenuProps) {
 
 const styles = StyleSheet.create({
   box: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     bottom: 0,
     left: 0,
     width: MENU_WIDTH,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },
