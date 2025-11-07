@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dimensions, View, StyleSheet, Text, Pressable } from "react-native";
 import Animated, {
   useSharedValue,
@@ -8,7 +8,7 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
-import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import PrimaryButton from "./PrimaryButton";
 import SideMenuContent from "./SideMenuContent";
 
@@ -19,6 +19,7 @@ const MENU_WIDTH = SCREEN_WIDTH * 0.75;
 const GESTURE_FAIL_DISTANCE = 5;
 // px/s minimum velocity to start closing
 const SWIPE_THRESHOLD_VELOCITY = 400;
+// Minimum distance to travel to start closing
 const SWIPE_THRESHOLD_TRANSLATEX = 25;
 
 interface SideMenuProps {
@@ -31,32 +32,30 @@ export default function SideMenu(props: SideMenuProps) {
   const translateX = useSharedValue(-MENU_WIDTH);
   const fullyOpen = useSharedValue(false);
   const shouldStartClosing = useSharedValue(false);
-  // const [innerOpen, setInnerOpen] = useState(props.isOpen);
   const innerOpen = useSharedValue(false);
   const [openingStarted, setOpeningStarted] = useState(false);
-  console.log("opening started", openingStarted);
+
+  const handleResetOpeningState = () => {
+    setOpeningStarted(false);
+  };
+
+  // Generally important thing is that useSharedValues run on UI thread and changes are recognized by
+  // gesture handler in its flow
   const panGesture = Gesture.Pan()
-    // Change to useSharedValue here since it runs on UI thread and no re-render is needed
     .hitSlop({ left: 0, width: innerOpen ? MENU_WIDTH : GESTURE_FAIL_DISTANCE })
-    .onTouchesDown((e) => {
-      console.log("touch start", e);
-    })
     .onBegin((e) => {
-      console.log("begin", e);
       scheduleOnRN(setOpeningStarted, true);
     })
     .onUpdate((e) => {
-      // Add logic here for when menu is fully open so that swiping to interact with the menu
-      // requires a certain distance before it registeres inputs
-      console.log("update", e);
       const { translationX, velocityX } = e;
-      console.log("translationX - movement", translationX);
-      console.log("velocity", velocityX);
+
+      // This is to not count minute finger movements for closing gesture since it's possible that
+      // users on touch move their fingers slightly while pressing something, for example
       if (fullyOpen.value && !shouldStartClosing.value) {
         if (Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY && Math.abs(translationX) > SWIPE_THRESHOLD_TRANSLATEX) {
           shouldStartClosing.value = true;
         }
-        console.log("here");
+
         return;
       }
 
@@ -68,22 +67,23 @@ export default function SideMenu(props: SideMenuProps) {
     })
     .onEnd((e) => {
       const { translationX, velocityX } = e;
-      console.log("end", e);
       const shouldOpen = translationX > MENU_WIDTH * (1 / 3) || velocityX > 500;
-      console.log("shouldopen", shouldOpen);
-      if (shouldOpen) {
-        translateX.value = withTiming(0, { duration: 200 });
-        fullyOpen.value = true;
-        innerOpen.value = true;
-        // scheduleOnRN(open)();
-      } else {
-        console.log("closes");
-        translateX.value = withTiming(-MENU_WIDTH, { duration: 200 });
+      const shouldClose = (translationX < MENU_WIDTH * (1 / 3) * -1 || velocityX < -500) && fullyOpen.value;
+
+      if (!fullyOpen.value && shouldOpen) {
+        translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false]);
+      } else if (!fullyOpen.value) {
         fullyOpen.value = false;
         innerOpen.value = false;
-        // setInnerOpen(false);
-        shouldStartClosing.value = false;
-        // scheduleOnRN(close)();
+        translateX.value = withTiming(-MENU_WIDTH, { duration: 200 }, () => scheduleOnRN(handleResetOpeningState));
+      }
+
+      if (fullyOpen.value && shouldClose) {
+        fullyOpen.value = false;
+        innerOpen.value = false;
+        translateX.value = withTiming(-MENU_WIDTH, { duration: 200 }, () => scheduleOnRN(handleResetOpeningState));
+      } else if (fullyOpen.value) {
+        translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false]);
       }
     });
 
@@ -107,45 +107,35 @@ export default function SideMenu(props: SideMenuProps) {
   });
 
   const handleBackdropClick = () => {
-    // setInnerOpen(false);
     fullyOpen.value = false;
-    translateX.value = withTiming(-MENU_WIDTH, { duration: 200 });
-  }
-  console.log(openingStarted)
+    innerOpen.value = false;
+    translateX.value = withTiming(-MENU_WIDTH, { duration: 200 }, () => scheduleOnRN(handleResetOpeningState));
+  };
+
   return (
-      // openingStarted state is updated when pan handling gesture starts so that the detection zone
-      // covers the whole side menu now, otherwise only 
-      <Animated.View style={!openingStarted ? styles.edgeZone : StyleSheet.absoluteFill}>
-        {/* Edge gesture zone — only active when closed */}
-        {!openingStarted && (
-          <GestureDetector gesture={panGesture}>
-            <View style={StyleSheet.absoluteFill} />
-          </GestureDetector>
-        )}
-
-        {/* Full menu layer — visible when opening or open */}
-        {openingStarted && (
-          <GestureDetector gesture={panGesture}>
-            <View style={StyleSheet.absoluteFill} pointerEvents="auto">
-              {/* Backdrop */}
-              <Pressable
-                onPress={handleBackdropClick}
-                style={StyleSheet.absoluteFill}
-              >
-                <Animated.View style={[StyleSheet.absoluteFill, backdropAnimatedStyle]} />
-              </Pressable>
-
-              {/* Menu */}
-              <Animated.View style={[styles.menu, menuAnimatedStyle]}>
-                <SideMenuContent />
-                <PrimaryButton onPress={() => console.log("TAP")}>
-                  <Text>This is primary button</Text>
-                </PrimaryButton>
-              </Animated.View>
-            </View>
-          </GestureDetector>
-        )}
-      </Animated.View>
+    // openingStarted state is updated when pan handling gesture starts so that the detection zone
+    // covers the whole side menu now, otherwise only the defined slice
+    <Animated.View style={!openingStarted ? styles.edgeZone : StyleSheet.absoluteFill}>
+      <GestureDetector gesture={panGesture}>
+        <View style={StyleSheet.absoluteFill} pointerEvents="auto">
+          {/* Backdrop */}
+          <Pressable
+            onPress={handleBackdropClick}
+            style={StyleSheet.absoluteFill}
+          >
+            <Animated.View style={[StyleSheet.absoluteFill, backdropAnimatedStyle]} />
+          </Pressable>
+          {/* Menu */}
+          {openingStarted &&
+            <Animated.View style={[styles.menu, menuAnimatedStyle]}>
+              <SideMenuContent />
+              <PrimaryButton onPress={() => console.log("TAP")}>
+                <Text>This is primary button</Text>
+              </PrimaryButton>
+            </Animated.View>}
+        </View>
+      </GestureDetector>
+    </Animated.View>
   );
 }
 
