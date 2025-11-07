@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -16,7 +15,7 @@ export function Header(props: HeaderProps) {
   };
 
   return (
-    <SafeAreaView style={styleSheet.container}>
+    <View style={styleSheet.container}>
       <View style={styleSheet.menuContainer}>
         <Pressable onPress={handleOpenMenu}>
           <MaterialIcons name="menu" size={36} color="white" />
@@ -32,7 +31,7 @@ export function Header(props: HeaderProps) {
           Logo
         </Text> */}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
