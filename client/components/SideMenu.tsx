@@ -68,7 +68,7 @@ export default function SideMenu(props: SideMenuProps) {
     .onEnd((e) => {
       const { translationX, velocityX } = e;
       const shouldOpen = translationX > MENU_WIDTH * (1 / 3) || velocityX > 500;
-      const shouldClose = (translationX < MENU_WIDTH * (1 / 3) * -1 || velocityX < -500) && fullyOpen.value;
+      const shouldClose = (translationX < MENU_WIDTH * (1 / 3) * -1 || velocityX < -500) && fullyOpen.value && shouldStartClosing.value;
 
       if (!fullyOpen.value && shouldOpen) {
         translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false]);
