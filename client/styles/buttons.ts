@@ -13,4 +13,7 @@ export const buttonStyles = StyleSheet.create({
   primaryPressed: {
     backgroundColor: "#1565C0",
   },
+  transparent: {
+    backgroundColor: "transparent",
+  }
 });

@@ -1,16 +1,14 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useState } from "react";
 
 interface HeaderProps {
+  openSideMenu: (open: boolean) => void;
   children?: React.ReactNode;
 }
 
 export function Header(props: HeaderProps) {
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-
   const handleOpenMenu = () => {
-    setIsSideMenuOpen(true);
+    props.openSideMenu(true);
     console.log("click");
   };
 

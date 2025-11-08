@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dimensions, View, StyleSheet, Text, Pressable } from "react-native";
 import Animated, {
   useSharedValue,
@@ -9,7 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import PrimaryButton from "./PrimaryButton";
+import { PrimaryButton } from "./Buttons";
 import SideMenuContent from "./SideMenuContent";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -25,6 +25,8 @@ const SWIPE_THRESHOLD_TRANSLATEX = 25;
 interface SideMenuProps {
   side: "left" | "right";
   isOpen: boolean;
+  children: React.ReactNode;
+  setIsOpen: (open: boolean) => void;
 }
 
 // TODO: calculate side menu content and concequently the width of the menu using View onLayout prop
@@ -35,9 +37,10 @@ export default function SideMenu(props: SideMenuProps) {
   const innerOpen = useSharedValue(false);
   const [openingStarted, setOpeningStarted] = useState(false);
 
-  const handleResetOpeningState = () => {
+  const handleResetOpeningState = useCallback(() => {
     setOpeningStarted(false);
-  };
+    props.setIsOpen(false);
+  }, [props]);
 
   // Generally important thing is that useSharedValues run on UI thread and changes are recognized by
   // gesture handler in its flow
@@ -71,7 +74,7 @@ export default function SideMenu(props: SideMenuProps) {
       const shouldClose = (translationX < MENU_WIDTH * (1 / 3) * -1 || velocityX < -500) && fullyOpen.value && shouldStartClosing.value;
 
       if (!fullyOpen.value && shouldOpen) {
-        translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false]);
+        translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false, scheduleOnRN(props.setIsOpen, true)]);
       } else if (!fullyOpen.value) {
         fullyOpen.value = false;
         innerOpen.value = false;
@@ -106,11 +109,24 @@ export default function SideMenu(props: SideMenuProps) {
     };
   });
 
-  const handleBackdropClick = () => {
+  const handleBackdropClick = useCallback(() => {
     fullyOpen.value = false;
     innerOpen.value = false;
     translateX.value = withTiming(-MENU_WIDTH, { duration: 200 }, () => scheduleOnRN(handleResetOpeningState));
-  };
+  }, [fullyOpen, handleResetOpeningState, innerOpen, translateX]);
+
+  const handleOpenMenu = useCallback(() => {
+    setOpeningStarted(true);
+    translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false]);
+  }, [fullyOpen, innerOpen, shouldStartClosing, translateX]);
+
+  useEffect(() => {
+    if (props.isOpen) {
+      handleOpenMenu();
+    } else {
+      handleBackdropClick();
+    }
+  }, [handleBackdropClick, handleOpenMenu, props.isOpen])
 
   return (
     // openingStarted state is updated when pan handling gesture starts so that the detection zone
@@ -128,7 +144,7 @@ export default function SideMenu(props: SideMenuProps) {
           {/* Menu */}
           {openingStarted &&
             <Animated.View style={[styles.menu, menuAnimatedStyle]}>
-              <SideMenuContent />
+              {props.children}
               <PrimaryButton onPress={() => console.log("TAP")}>
                 <Text>This is primary button</Text>
               </PrimaryButton>

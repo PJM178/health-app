@@ -3,10 +3,10 @@ import { buttonStyles } from "@/styles/buttons";
 
 interface GeneralButtonProps {
   children: React.ReactNode;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
-const PrimaryButton = (props: GeneralButtonProps) => {
+export const PrimaryButton = (props: GeneralButtonProps) => {
   return (
     <Pressable
       onPress={props.onPress}
@@ -17,8 +17,19 @@ const PrimaryButton = (props: GeneralButtonProps) => {
     >
       {props.children}
     </Pressable>
-
   );
 };
 
-export default PrimaryButton;
+export const TransparentButton = (props: GeneralButtonProps) => {
+  return (
+    <Pressable
+      onPress={props.onPress}
+      style={({ pressed }) => [
+        buttonStyles.base, buttonStyles.primary,
+        { backgroundColor: pressed ? buttonStyles.primaryPressed.backgroundColor :  buttonStyles.primary.backgroundColor },
+      ]}
+    >
+      {props.children}
+    </Pressable>
+  );
+};
