@@ -43,7 +43,7 @@ export default function SideMenu(props: SideMenuProps) {
   // gesture handler in its flow
   const panGesture = Gesture.Pan()
     .hitSlop({ left: 0, width: innerOpen ? MENU_WIDTH : GESTURE_FAIL_DISTANCE })
-    .onBegin((e) => {
+    .onStart((e) => {
       scheduleOnRN(setOpeningStarted, true);
     })
     .onUpdate((e) => {
@@ -52,7 +52,7 @@ export default function SideMenu(props: SideMenuProps) {
       // This is to not count minute finger movements for closing gesture since it's possible that
       // users on touch move their fingers slightly while pressing something, for example
       if (fullyOpen.value && !shouldStartClosing.value) {
-        if (Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY && Math.abs(translationX) > SWIPE_THRESHOLD_TRANSLATEX) {
+        if (Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY || Math.abs(translationX) > SWIPE_THRESHOLD_TRANSLATEX) {
           shouldStartClosing.value = true;
         }
 
