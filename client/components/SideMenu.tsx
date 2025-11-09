@@ -10,17 +10,17 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { PrimaryButton } from "./Buttons";
-import SideMenuContent from "./SideMenuContent";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 // This probably should be the actual content width which likely requires a hook to calculate the width 
 const MENU_WIDTH = SCREEN_WIDTH * 0.75;
 // This controls how close to the left edge your gesture needs to be for it to trigger opening the menu
-const GESTURE_FAIL_DISTANCE = 5;
+const GESTURE_FAIL_DISTANCE = 10;
 // px/s minimum velocity to start closing
 const SWIPE_THRESHOLD_VELOCITY = 400;
 // Minimum distance to travel to start closing
 const SWIPE_THRESHOLD_TRANSLATEX = 25;
+const MENU_ANIMATION_DURATION = 200;
 
 interface SideMenuProps {
   side: "left" | "right";
@@ -43,9 +43,9 @@ export default function SideMenu(props: SideMenuProps) {
   }, [props]);
 
   // Generally important thing is that useSharedValues run on UI thread and changes are recognized by
-  // gesture handler in its flow
+  // gesture handler in its flow, so heavy updates should always run on UI thread
   const panGesture = Gesture.Pan()
-    .hitSlop({ left: 0, width: innerOpen ? MENU_WIDTH : GESTURE_FAIL_DISTANCE })
+    .hitSlop({ left: 0, width: !openingStarted ? GESTURE_FAIL_DISTANCE : MENU_WIDTH })
     .onStart((e) => {
       scheduleOnRN(setOpeningStarted, true);
     })
@@ -73,20 +73,26 @@ export default function SideMenu(props: SideMenuProps) {
       const shouldOpen = translationX > MENU_WIDTH * (1 / 3) || velocityX > 500;
       const shouldClose = (translationX < MENU_WIDTH * (1 / 3) * -1 || velocityX < -500) && fullyOpen.value && shouldStartClosing.value;
 
+      // Normalize the animation duration based on the swipe velocity so that the animation is not so jarring
+      const distanceLeft = fullyOpen.value ? translateX.value + MENU_WIDTH : -translateX.value;             
+      const safeVelocity = Math.max(Math.abs(velocityX) / 1000, 0.1);
+      const duration = distanceLeft / safeVelocity;
+      const animationDuration = MENU_ANIMATION_DURATION > duration ? duration : MENU_ANIMATION_DURATION;
+
       if (!fullyOpen.value && shouldOpen) {
-        translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false, scheduleOnRN(props.setIsOpen, true)]);
+        translateX.value = withTiming(0, { duration: animationDuration }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false, scheduleOnRN(props.setIsOpen, true)]);
       } else if (!fullyOpen.value) {
         fullyOpen.value = false;
         innerOpen.value = false;
-        translateX.value = withTiming(-MENU_WIDTH, { duration: 200 }, () => scheduleOnRN(handleResetOpeningState));
+        translateX.value = withTiming(-MENU_WIDTH, { duration: animationDuration }, () => scheduleOnRN(handleResetOpeningState));
       }
 
       if (fullyOpen.value && shouldClose) {
         fullyOpen.value = false;
         innerOpen.value = false;
-        translateX.value = withTiming(-MENU_WIDTH, { duration: 200 }, () => scheduleOnRN(handleResetOpeningState));
+        translateX.value = withTiming(-MENU_WIDTH, { duration: animationDuration }, () => scheduleOnRN(handleResetOpeningState));
       } else if (fullyOpen.value) {
-        translateX.value = withTiming(0, { duration: 200 }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false]);
+        translateX.value = withTiming(0, { duration: animationDuration }, () => [fullyOpen.value = true, innerOpen.value = true, shouldStartClosing.value = false]);
       }
     });
 
@@ -127,7 +133,7 @@ export default function SideMenu(props: SideMenuProps) {
       handleBackdropClick();
     }
   }, [handleBackdropClick, handleOpenMenu, props.isOpen])
-
+  console.log("opening started", openingStarted);
   return (
     // openingStarted state is updated when pan handling gesture starts so that the detection zone
     // covers the whole side menu now, otherwise only the defined slice

@@ -30,6 +30,17 @@ const SideMenuContent = (props: SideMenuContentProps) => {
           </TransparentButton>
         </Link>
       </View>
+      <View>
+        <Link href="/users" asChild>
+          <TransparentButton
+            onPress={() => props.closeSideMenu(false)}
+          >
+            <Text>
+              Users
+            </Text>
+          </TransparentButton>
+        </Link>
+      </View>
     </View>
   );
 };
