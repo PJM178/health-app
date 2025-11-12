@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import usersRoute from "./routes/users.route";
+import userMetricsRoute from "./routes/user_metrics.route";
 import cors from "cors";
 import { connectToDb } from "./db";
 
@@ -9,17 +10,20 @@ const PORT = process.env.PORT || 8000;
 // Middleware
 app.use(express.json());
 
-// Allow requests from frontend
+// Configure cors
 app.use(cors({
-  origin: "http://localhost:8081", // or "*" to allow all origins (not recommended for production)
-  credentials: false // only if you're using cookies or auth headers
+  // Allow requests coming from the front
+  origin: "http://localhost:8081",
+  credentials: false
 }));
 
 // Routes
-app.use("/api/users", usersRoute);
+// Users and user metrics
+app.use("/api/users", [userMetricsRoute, usersRoute]);
 
+// Initialize the server
 async function initializeServer() {
-  // Try to connect to the db
+  // Setup the database - if connection to the database fails, node process exits and the server won't start
   await connectToDb();
 
   app.listen(PORT, () => {
