@@ -16,4 +16,10 @@ export class UserMetricsService {
 
     return metrics;
   }
+
+  async getUserMetricsBasedOnId(userId: string): Promise<Unit[]> {
+    const metrics = await this.userMetricsRepository.findUserMetricsByUserId(userId);
+
+    return metrics;
+  }
 }
